@@ -15,17 +15,6 @@ fn parse_float(s: &str) -> IResult<&str, f64> {
     double(s)
 }
 
-// fn parse_integer(s: &str) -> IResult<&str, i64> {
-//     map_res(digit1, str::parse)(s)
-// }
-
-fn parse_integer(s: &str) -> IResult<&str, i64> {
-    // explain why using and, not and_then
-    let integer = map_res(digit1, str::parse);
-    let not_float = not(tuple((digit1, char('.'), digit1)));
-    not_float.and(integer).map(|(_, i)| i).parse(s)
-}
-
 fn parse_boolean(s: &str) -> IResult<&str, bool> {
     alt((tag("true"), tag("false")))
         .map(|s: &str| match s {
@@ -34,6 +23,12 @@ fn parse_boolean(s: &str) -> IResult<&str, bool> {
             _ => unreachable!(),
         })
         .parse(s)
+}
+
+fn parse_integer(s: &str) -> IResult<&str, i64> {
+    let integer = map_res(digit1, str::parse);
+    let not_float = not(tuple((digit1, char('.'), digit1)));
+    not_float.and(integer).map(|(_, i)| i).parse(s)
 }
 
 fn parse_string(s: &str) -> IResult<&str, String> {
@@ -183,8 +178,8 @@ pub mod test {
 
     #[test]
     fn test_parse_float_3() {
-        let r = parse_float("0.1other").unwrap();
-        assert_compact_debug_snapshot!(r, @r#"("other", 0.1)"#)
+        let r = parse_float("0.1 remaining").unwrap();
+        assert_compact_debug_snapshot!(r, @r#"(" remaining", 0.1)"#)
     }
 
     #[test]
@@ -207,7 +202,7 @@ pub mod test {
 
     #[test]
     fn test_parse_array_2() {
-        let r = parse_array("[  \"abc\", 1, 2.0, true ]").unwrap();
+        let r = parse_array("[  \"abc\", 1,  2.0, true ]").unwrap();
         assert_debug_snapshot!(r, @r#"
         (
             "",
@@ -309,9 +304,9 @@ name = "Tom Preston-Werner"
 
 [database]
 enabled = true
-ports = [ 8000, 8001, 8002 ]
-data = [ ["delta", "phi"], [3.14] ]
-temp_targets = { cpu = 79.5, case = 72.0 }
+ports = [8000, 8001, 8002]
+data = [["delta", "phi"], [3.14, { a = 72.0, b = 26 }] ]
+temp_targets = { cpu = 79.5, case = { a = 72.0, b = 26 } }
 
 [servers-alpha]
 ip = "10.0.0.1"
@@ -422,6 +417,28 @@ role = "backend""#;
                                                             Float(
                                                                 3.14,
                                                             ),
+                                                            InlineTable(
+                                                                InlineTable(
+                                                                    [
+                                                                        Pair {
+                                                                            key: Identifier(
+                                                                                "a",
+                                                                            ),
+                                                                            value: Float(
+                                                                                72.0,
+                                                                            ),
+                                                                        },
+                                                                        Pair {
+                                                                            key: Identifier(
+                                                                                "b",
+                                                                            ),
+                                                                            value: Integer(
+                                                                                26,
+                                                                            ),
+                                                                        },
+                                                                    ],
+                                                                ),
+                                                            ),
                                                         ],
                                                     ),
                                                 ),
@@ -448,8 +465,27 @@ role = "backend""#;
                                                     key: Identifier(
                                                         "case",
                                                     ),
-                                                    value: Float(
-                                                        72.0,
+                                                    value: InlineTable(
+                                                        InlineTable(
+                                                            [
+                                                                Pair {
+                                                                    key: Identifier(
+                                                                        "a",
+                                                                    ),
+                                                                    value: Float(
+                                                                        72.0,
+                                                                    ),
+                                                                },
+                                                                Pair {
+                                                                    key: Identifier(
+                                                                        "b",
+                                                                    ),
+                                                                    value: Integer(
+                                                                        26,
+                                                                    ),
+                                                                },
+                                                            ],
+                                                        ),
                                                     ),
                                                 },
                                             ],
