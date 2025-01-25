@@ -3,6 +3,8 @@ use std::fmt::{Display, Formatter, Result as FmtResult, Write};
 
 const INDENTATION: &str = "  ";
 
+// It's better to use a custom trait named like DisplayYaml instead of Display
+
 impl Display for Identifier {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         self.0.fmt(f)
@@ -109,6 +111,7 @@ impl Display for Document {
     }
 }
 
+// puts indentation between lines
 fn indent_inbetween(f: &mut Formatter<'_>, s: &str) -> FmtResult {
     let mut iter = s.split_inclusive("\n");
     if let Some(line) = iter.next() {
@@ -122,6 +125,7 @@ fn indent_inbetween(f: &mut Formatter<'_>, s: &str) -> FmtResult {
     Ok(())
 }
 
+// puts indentation before each line
 fn indent_all(f: &mut Formatter<'_>, s: &str) -> FmtResult {
     for line in s.split_inclusive("\n") {
         f.write_str(INDENTATION)?;
