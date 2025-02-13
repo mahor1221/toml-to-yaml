@@ -16,7 +16,7 @@ impl Display for Value {
         match self {
             Self::Integer(v) => v.fmt(f),
             // See: https://doc.rust-lang.org/std/fmt/index.html
-            Self::Float(v) => write!(f, "{:.?}", v),
+            Self::Float(v) => write!(f, "{:?}", v),
             Self::Boolean(v) => v.fmt(f),
             Self::String(v) => v.fmt(f),
             Self::Array(v) => indent_inbetween(f, &v.to_string()),
